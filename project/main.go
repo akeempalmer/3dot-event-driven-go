@@ -7,6 +7,7 @@ import (
 
 	"github.com/ThreeDotsLabs/go-event-driven/v2/common/clients"
 	"github.com/ThreeDotsLabs/go-event-driven/v2/common/log"
+	"github.com/redis/go-redis/v9"
 
 	"tickets/adapters"
 	"tickets/service"
@@ -20,12 +21,21 @@ func main() {
 		panic(err)
 	}
 
+	rdsClient := redis.NewClient(&redis.Options{
+		Addr: os.Getenv("REDIS_ADDR"),
+	})
+	err = rdsClient.Ping(context.Background()).Err()
+	if err != nil {
+		panic(err)
+	}
+
 	spreadsheetsAPI := adapters.NewSpreadsheetsAPIClient(apiClients)
 	receiptsService := adapters.NewReceiptsServiceClient(apiClients)
 
 	err = service.New(
 		spreadsheetsAPI,
 		receiptsService,
+		rdsClient,
 	).Run(context.Background())
 	if err != nil {
 		panic(err)

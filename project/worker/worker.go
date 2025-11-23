@@ -3,6 +3,8 @@ package worker
 import (
 	"context"
 	"log/slog"
+
+	"github.com/ThreeDotsLabs/watermill-redisstream/pkg/redisstream"
 )
 
 type Task int
@@ -11,6 +13,11 @@ const (
 	TaskIssueReceipt Task = iota
 	TaskAppendToTracker
 )
+
+type PubMessage struct {
+	ID      string
+	Payload []byte
+}
 
 type Message struct {
 	Task     Task
@@ -50,21 +57,58 @@ func (w *Worker) Send(msgs ...Message) {
 	}
 }
 
-func (w *Worker) Run(ctx context.Context) {
-	for msg := range w.queue {
-		switch msg.Task {
-		case TaskIssueReceipt:
-			err := w.receiptsService.IssueReceipt(ctx, msg.TicketID)
+func (w *Worker) Run(ctx context.Context, receiptSub, sheetSub *redisstream.Subscriber) {
+
+	go func() {
+		messages, err := receiptSub.Subscribe(context.Background(), "issue-receipt")
+		if err != nil {
+			panic(err)
+		}
+
+		for msg := range messages {
+			err := w.receiptsService.IssueReceipt(msg.Context(), string(msg.Payload))
 			if err != nil {
 				slog.With("error", err).Error("failed to issue the receipt")
-				w.Send(msg)
+				msg.Nack()
+				continue
 			}
-		case TaskAppendToTracker:
-			err := w.spreadsheetsAPI.AppendRow(ctx, "tickets-to-print", []string{msg.TicketID})
+
+			msg.Ack()
+		}
+	}()
+
+	go func() {
+		messages, err := sheetSub.Subscribe(context.Background(), "append-to-tracker")
+		if err != nil {
+			panic(err)
+		}
+
+		for msg := range messages {
+			err := w.spreadsheetsAPI.AppendRow(msg.Context(), "tickets-to-print", []string{string(msg.Payload)})
 			if err != nil {
 				slog.With("error", err).Error("failed to append to tracker")
-				w.Send(msg)
+				msg.Nack()
+				continue
 			}
+
+			msg.Ack()
 		}
-	}
+	}()
+
+	// for msg := range w.queue {
+	// 	switch msg.Task {
+	// 	case TaskIssueReceipt:
+	// 		err := w.receiptsService.IssueReceipt(ctx, msg.TicketID)
+	// 		if err != nil {
+	// 			slog.With("error", err).Error("failed to issue the receipt")
+	// 			w.Send(msg)
+	// 		}
+	// 	case TaskAppendToTracker:
+	// 		err := w.spreadsheetsAPI.AppendRow(ctx, "tickets-to-print", []string{msg.TicketID})
+	// 		if err != nil {
+	// 			slog.With("error", err).Error("failed to append to tracker")
+	// 			w.Send(msg)
+	// 		}
+	// 	}
+	// }
 }
