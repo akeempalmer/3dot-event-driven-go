@@ -2,9 +2,9 @@ package worker
 
 import (
 	"context"
-	"log/slog"
 
 	"github.com/ThreeDotsLabs/watermill-redisstream/pkg/redisstream"
+	"github.com/ThreeDotsLabs/watermill/message"
 )
 
 type Task int
@@ -57,43 +57,43 @@ func (w *Worker) Send(msgs ...Message) {
 	}
 }
 
-func (w *Worker) Run(ctx context.Context, receiptSub, sheetSub *redisstream.Subscriber) {
+func (w *Worker) Run(ctx context.Context, router *message.Router, receiptSub, sheetSub *redisstream.Subscriber) {
 
-	go func() {
-		messages, err := receiptSub.Subscribe(context.Background(), "issue-receipt")
-		if err != nil {
-			panic(err)
-		}
+	// go func() {
+	// 	messages, err := receiptSub.Subscribe(context.Background(), "issue-receipt")
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
 
-		for msg := range messages {
-			err := w.receiptsService.IssueReceipt(msg.Context(), string(msg.Payload))
-			if err != nil {
-				slog.With("error", err).Error("failed to issue the receipt")
-				msg.Nack()
-				continue
-			}
+	// 	for msg := range messages {
+	// 		err := w.receiptsService.IssueReceipt(msg.Context(), string(msg.Payload))
+	// 		if err != nil {
+	// 			slog.With("error", err).Error("failed to issue the receipt")
+	// 			msg.Nack()
+	// 			continue
+	// 		}
 
-			msg.Ack()
-		}
-	}()
+	// 		msg.Ack()
+	// 	}
+	// }()
 
-	go func() {
-		messages, err := sheetSub.Subscribe(context.Background(), "append-to-tracker")
-		if err != nil {
-			panic(err)
-		}
+	// go func() {
+	// 	messages, err := sheetSub.Subscribe(context.Background(), "append-to-tracker")
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
 
-		for msg := range messages {
-			err := w.spreadsheetsAPI.AppendRow(msg.Context(), "tickets-to-print", []string{string(msg.Payload)})
-			if err != nil {
-				slog.With("error", err).Error("failed to append to tracker")
-				msg.Nack()
-				continue
-			}
+	// 	for msg := range messages {
+	// 		err := w.spreadsheetsAPI.AppendRow(msg.Context(), "tickets-to-print", []string{string(msg.Payload)})
+	// 		if err != nil {
+	// 			slog.With("error", err).Error("failed to append to tracker")
+	// 			msg.Nack()
+	// 			continue
+	// 		}
 
-			msg.Ack()
-		}
-	}()
+	// 		msg.Ack()
+	// 	}
+	// }()
 
 	// for msg := range w.queue {
 	// 	switch msg.Task {
