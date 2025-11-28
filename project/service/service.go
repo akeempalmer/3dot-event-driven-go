@@ -3,47 +3,69 @@ package service
 import (
 	"context"
 	"errors"
+	"log/slog"
 	stdHTTP "net/http"
 
-	"github.com/ThreeDotsLabs/watermill-redisstream/pkg/redisstream"
-	"github.com/ThreeDotsLabs/watermill/message"
+	"github.com/ThreeDotsLabs/watermill"
+	watermillMessage "github.com/ThreeDotsLabs/watermill/message"
 	"github.com/labstack/echo/v4"
+	"github.com/redis/go-redis/v9"
+	"golang.org/x/sync/errgroup"
 
 	ticketsHttp "tickets/http"
+	"tickets/message"
 	"tickets/worker"
 )
 
 type Service struct {
-	echoRouter *echo.Echo
+	echoRouter      *echo.Echo
+	watermillRouter *watermillMessage.Router
 }
 
 func New(
 	spreadsheetsAPI worker.SpreadsheetsAPI,
 	receiptsService worker.ReceiptsService,
-	router *message.Router,
-	publisher *redisstream.Publisher,
+	redisClient *redis.Client,
 ) Service {
+	watermillLogger := watermill.NewSlogLogger(slog.Default())
 
-	worker := worker.NewWorker(spreadsheetsAPI, receiptsService)
+	var redisPublisher watermillMessage.Publisher
+	redisPublisher = message.NewRedisPublisher(redisClient, watermillLogger)
 
-	echoRouter := ticketsHttp.NewHttpRouter(publisher)
+	watermillRouter := message.NewWatermillRouter(
+		receiptsService,
+		spreadsheetsAPI,
+		redisClient,
+		watermillLogger,
+	)
 
-	go worker.Run(context.Background(), router, nil, nil)
+	echoRouter := ticketsHttp.NewHttpRouter(redisPublisher)
+
 	return Service{
-		echoRouter: echoRouter,
+		echoRouter,
+		watermillRouter,
 	}
 }
 
-func (s Service) Run(ctx context.Context, router *message.Router) error {
+func (s Service) Run(ctx context.Context) error {
+	errgrp, ctx := errgroup.WithContext(ctx)
 
-	go func() {
-		router.Run(context.Background())
-	}()
+	errgrp.Go(func() error {
+		return s.watermillRouter.Run(ctx)
+	})
 
-	err := s.echoRouter.Start(":8080")
-	if err != nil && !errors.Is(err, stdHTTP.ErrServerClosed) {
-		return err
-	}
+	errgrp.Go(func() error {
+		err := s.echoRouter.Start(":8080")
+		if err != nil && !errors.Is(err, stdHTTP.ErrServerClosed) {
+			return err
+		}
+		return nil
+	})
 
-	return nil
+	errgrp.Go(func() error {
+		<-ctx.Done()
+		return s.echoRouter.Shutdown(context.Background())
+	})
+
+	return errgrp.Wait()
 }

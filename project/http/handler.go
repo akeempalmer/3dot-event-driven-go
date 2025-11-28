@@ -1,10 +1,8 @@
 package http
 
-import (
-	"github.com/ThreeDotsLabs/watermill-redisstream/pkg/redisstream"
-)
+import "github.com/ThreeDotsLabs/watermill/message"
 
 type Handler struct {
 	// worker *worker.Worker
-	pub redisstream.Publisher
+	publisher message.Publisher
 }
