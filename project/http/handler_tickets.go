@@ -35,39 +35,58 @@ func (h Handler) PostTicketsConfirmation(c echo.Context) error {
 
 	for _, ticket := range request.Tickets {
 
-		ticketReceipt := entities.IssueReceiptPayload{
-			TicketID: ticket.TicketID,
-			Price:    ticket.Price,
-		}
-
-		ticketReceiptPayload, err := json.Marshal(ticketReceipt)
-		if err != nil {
-			return err
-		}
-
-		msg := message.NewMessage(watermill.NewUUID(), []byte(ticketReceiptPayload))
-
-		err = h.publisher.Publish("issue-receipt", msg)
-		if err != nil {
-			return err
-		}
-
-		ticketEvent := entities.AppendToTrackerPayload{
+		payload := entities.TicketBookingConfirmed{
+			Header:        entities.NewMessageHeader(),
 			TicketID:      ticket.TicketID,
 			CustomerEmail: ticket.CustomerEmail,
 			Price:         ticket.Price,
 		}
 
-		ticketPayload, err := json.Marshal(ticketEvent)
+		payloadEvent, err := json.Marshal(payload)
+		if err != nil {
+			return err
+		}
+
+		msg := message.NewMessage(watermill.NewUUID(), []byte(payloadEvent))
+
+		err = h.publisher.Publish("TicketBookingConfirmed", msg)
 		if err != nil {
 			continue
 		}
 
-		msg = message.NewMessage(watermill.NewUUID(), []byte(ticketPayload))
-		err = h.publisher.Publish("append-to-tracker", msg)
-		if err != nil {
-			return err
-		}
+		// ticketReceipt := entities.IssueReceiptPayload{
+		// 	TicketID: ticket.TicketID,
+		// 	Price:    ticket.Price,
+		// }
+
+		// ticketReceiptPayload, err := json.Marshal(ticketReceipt)
+		// if err != nil {
+		// 	return err
+		// }
+
+		// msg := message.NewMessage(watermill.NewUUID(), []byte(ticketReceiptPayload))
+
+		// err = h.publisher.Publish("issue-receipt", msg)
+		// if err != nil {
+		// 	return err
+		// }
+
+		// ticketEvent := entities.AppendToTrackerPayload{
+		// 	TicketID:      ticket.TicketID,
+		// 	CustomerEmail: ticket.CustomerEmail,
+		// 	Price:         ticket.Price,
+		// }
+
+		// ticketPayload, err := json.Marshal(ticketEvent)
+		// if err != nil {
+		// 	continue
+		// }
+
+		// msg = message.NewMessage(watermill.NewUUID(), []byte(ticketPayload))
+		// err = h.publisher.Publish("append-to-tracker", msg)
+		// if err != nil {
+		// 	return err
+		// }
 	}
 
 	return c.NoContent(http.StatusOK)
