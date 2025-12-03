@@ -35,22 +35,46 @@ func (h Handler) PostTicketsConfirmation(c echo.Context) error {
 
 	for _, ticket := range request.Tickets {
 
-		payload := entities.TicketBookingConfirmed{
-			Header:        entities.NewMessageHeader(),
-			TicketID:      ticket.TicketID,
-			CustomerEmail: ticket.CustomerEmail,
-			Price:         ticket.Price,
-		}
+		switch ticket.Status {
+		case "confirmed":
+			payload := entities.TicketBookingConfirmed{
+				Header:        entities.NewMessageHeader(),
+				TicketID:      ticket.TicketID,
+				CustomerEmail: ticket.CustomerEmail,
+				Price:         ticket.Price,
+				Status:        ticket.Status,
+			}
 
-		payloadEvent, err := json.Marshal(payload)
-		if err != nil {
-			return err
-		}
+			payloadEvent, err := json.Marshal(payload)
+			if err != nil {
+				return err
+			}
 
-		msg := message.NewMessage(watermill.NewUUID(), []byte(payloadEvent))
+			msg := message.NewMessage(watermill.NewUUID(), []byte(payloadEvent))
+			err = h.publisher.Publish("TicketBookingConfirmed", msg)
+			if err != nil {
+				continue
+			}
 
-		err = h.publisher.Publish("TicketBookingConfirmed", msg)
-		if err != nil {
+		case "canceled":
+			payload := entities.TicketBookingConfirmed{
+				Header:        entities.NewMessageHeader(),
+				TicketID:      ticket.TicketID,
+				CustomerEmail: ticket.CustomerEmail,
+				Price:         ticket.Price,
+			}
+
+			payloadEvent, err := json.Marshal(payload)
+			if err != nil {
+				return err
+			}
+
+			msg := message.NewMessage(watermill.NewUUID(), []byte(payloadEvent))
+			err = h.publisher.Publish("TicketBookingCanceled", msg)
+			if err != nil {
+				continue
+			}
+		default:
 			continue
 		}
 

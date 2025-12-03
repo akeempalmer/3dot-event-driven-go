@@ -46,6 +46,14 @@ func NewWatermillRouter(
 		panic(err)
 	}
 
+	bookingFailedSub, err := redisstream.NewSubscriber(redisstream.SubscriberConfig{
+		Client:        rdb,
+		ConsumerGroup: "failed-booking-subscriber",
+	}, watermilLogger)
+	if err != nil {
+		panic(err)
+	}
+
 	// router.AddConsumerHandler(
 	// 	"issue_receipt",
 	// 	"issue-receipt",
@@ -108,6 +116,17 @@ func NewWatermillRouter(
 		}
 
 		return handler.AppendToTracker(msg.Context(), payload)
+	})
+
+	router.AddConsumerHandler("publish_failed_booking", "TicketBookingCanceled", bookingFailedSub, func(msg *message.Message) error {
+		var payload entities.TicketBookingCanceled
+
+		err := json.Unmarshal(msg.Payload, &payload)
+		if err != nil {
+			return err
+		}
+
+		return handler.AppendCancelToTracker(msg.Context(), payload)
 	})
 
 	return router

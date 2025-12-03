@@ -28,6 +28,14 @@ type TicketBookingConfirmed struct {
 	TicketID      string `json:"ticket_id"`
 	CustomerEmail string `json:"customer_email"`
 	Price         Money  `json:"price"`
+	Status        string `json:"status"`
+}
+
+type TicketBookingCanceled struct {
+	Header        MessageHeader `json:"header"`
+	TicketID      string        `json:"ticket_id"`
+	CustomerEmail string        `json:"customer_email"`
+	Price         Money         `json:"price"`
 }
 
 type MessageHeader struct {
