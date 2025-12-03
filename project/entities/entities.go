@@ -10,3 +10,8 @@ type AppendToTrackerPayload struct {
 	Price         Money  `json:"price"`
 	CustomerEmail string `json:"customer_email"`
 }
+
+type IssueReceiptPayload struct {
+	TicketID string `json:"ticket_id"`
+	Price    Money  `json:"price"`
+}

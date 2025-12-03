@@ -34,7 +34,18 @@ func (h Handler) PostTicketsConfirmation(c echo.Context) error {
 	// }
 
 	for _, ticket := range request.Tickets {
-		msg := message.NewMessage(watermill.NewUUID(), []byte(ticket.TicketID))
+
+		ticketReceipt := entities.IssueReceiptPayload{
+			TicketID: ticket.TicketID,
+			Price:    ticket.Price,
+		}
+
+		ticketReceiptPayload, err := json.Marshal(ticketReceipt)
+		if err != nil {
+			return err
+		}
+
+		msg := message.NewMessage(watermill.NewUUID(), []byte(ticketReceiptPayload))
 
 		err = h.publisher.Publish("issue-receipt", msg)
 		if err != nil {

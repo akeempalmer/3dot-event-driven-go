@@ -17,7 +17,7 @@ type SpreadsheetsAPI interface {
 }
 
 type ReceiptsService interface {
-	IssueReceipt(ctx context.Context, ticketID string) error
+	IssueReceipt(ctx context.Context, request entities.IssueReceiptPayload) error
 }
 
 func NewWatermillRouter(
@@ -49,7 +49,14 @@ func NewWatermillRouter(
 		"issue-receipt",
 		issueReceiptSub,
 		func(msg *message.Message) error {
-			err := receiptsService.IssueReceipt(msg.Context(), string(msg.Payload))
+			var ticketReceiptEvent entities.IssueReceiptPayload
+
+			err := json.Unmarshal(msg.Payload, &ticketReceiptEvent)
+			if err != nil {
+				return fmt.Errorf("failed to unmarshal ticket event")
+			}
+
+			err = receiptsService.IssueReceipt(msg.Context(), ticketReceiptEvent)
 			if err != nil {
 				return fmt.Errorf("failed to issue receipt: %w", err)
 			}
