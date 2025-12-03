@@ -2,7 +2,9 @@ package message
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"tickets/entities"
 
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill-redisstream/pkg/redisstream"
@@ -60,7 +62,14 @@ func NewWatermillRouter(
 		"append-to-tracker",
 		appendToTrackerSub,
 		func(msg *message.Message) error {
-			err := spreadsheetsAPI.AppendRow(msg.Context(), "tickets-to-print", []string{string(msg.Payload)})
+			var ticketEvent entities.AppendToTrackerPayload
+
+			err := json.Unmarshal(msg.Payload, &ticketEvent)
+			if err != nil {
+				return fmt.Errorf("failed to unmarashal ticket event")
+			}
+
+			err = spreadsheetsAPI.AppendRow(msg.Context(), "tickets-to-print", []string{ticketEvent.TicketID, ticketEvent.CustomerEmail, ticketEvent.Price.Amount, ticketEvent.Price.Currency})
 			if err != nil {
 				return fmt.Errorf("failed to append to tracker: %w", err)
 			}
