@@ -3,10 +3,12 @@ package event
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"tickets/entities"
 )
 
 func (h Handler) IssueReceipt(ctx context.Context, event entities.TicketBookingConfirmed) error {
+	slog.Info("Issuing receipt")
 
 	payload := entities.IssueReceiptPayload{
 		TicketID: event.TicketID,

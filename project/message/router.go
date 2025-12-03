@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"tickets/entities"
+	"tickets/message/event"
 
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill-redisstream/pkg/redisstream"
@@ -26,6 +27,8 @@ func NewWatermillRouter(
 	watermilLogger watermill.LoggerAdapter,
 ) *message.Router {
 	router := message.NewDefaultRouter(watermilLogger)
+
+	handler := event.NewHandler(spreadsheetsAPI, receiptsService)
 
 	issueReceiptSub, err := redisstream.NewSubscriber(redisstream.SubscriberConfig{
 		Client:        rdb,
@@ -92,10 +95,7 @@ func NewWatermillRouter(
 			return err
 		}
 
-		return receiptsService.IssueReceipt(msg.Context(), entities.IssueReceiptPayload{
-			TicketID: payload.TicketID,
-			Price:    payload.Price,
-		})
+		return handler.IssueReceipt(msg.Context(), payload)
 	})
 
 	router.AddConsumerHandler("append_to_tracker", "TicketBookingConfirmed", appendToTrackerSub, func(msg *message.Message) error {
@@ -107,12 +107,7 @@ func NewWatermillRouter(
 			return err
 		}
 
-		return spreadsheetsAPI.AppendRow(msg.Context(), "tickets-to-print", []string{
-			payload.TicketID,
-			payload.CustomerEmail,
-			payload.Price.Amount,
-			payload.Price.Currency,
-		})
+		return handler.AppendToTracker(msg.Context(), payload)
 	})
 
 	return router
