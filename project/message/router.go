@@ -60,7 +60,7 @@ func NewWatermillRouter(
 		"append-to-tracker",
 		appendToTrackerSub,
 		func(msg *message.Message) error {
-			err := spreadsheetsAPI.AppendRow(msg.Context(), "Tracker", []string{string(msg.Payload)})
+			err := spreadsheetsAPI.AppendRow(msg.Context(), "tickets-to-print", []string{string(msg.Payload)})
 			if err != nil {
 				return fmt.Errorf("failed to append to tracker: %w", err)
 			}

@@ -17,7 +17,8 @@ func NewHttpRouter(
 		publisher: publisher,
 	}
 
-	e.POST("/tickets-confirmation", handler.PostTicketsConfirmation)
+	// e.POST("/tickets-confirmation", handler.PostTicketsConfirmation)
+	e.POST("/tickets-status", handler.PostTicketsConfirmation)
 
 	e.GET("/health", handler.GetHealthHandler)
 
