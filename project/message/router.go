@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"tickets/entities"
 	"tickets/message/event"
+	"tickets/middlewares"
 
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill-redisstream/pkg/redisstream"
@@ -53,6 +54,11 @@ func NewWatermillRouter(
 	if err != nil {
 		panic(err)
 	}
+
+	router.AddMiddleware(middlewares.LogHeader{
+		MessageID: watermill.NewUUID(),
+		Payload:   "Handling a message",
+	}.LoggerMiddleware)
 
 	// router.AddConsumerHandler(
 	// 	"issue_receipt",
