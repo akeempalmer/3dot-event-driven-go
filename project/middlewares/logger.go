@@ -23,12 +23,6 @@ func (lh LogHeader) LoggerMiddleware(next message.HandlerFunc) message.HandlerFu
 
 		logger.With("message_id", log.CorrelationIDFromContext(msg.Context())).Info("Handling a message")
 
-		defer func() {
-			if err != nil {
-				logger.With("error", err, "message_id", msg.UUID).Error("Error while handling a message")
-			}
-		}()
-
 		return next(msg)
 	}
 }

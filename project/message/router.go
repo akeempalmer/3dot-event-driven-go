@@ -71,6 +71,8 @@ func NewWatermillRouter(
 		Logger:          watermilLogger,
 	}.Middleware)
 
+	router.AddMiddleware(middlewares.SkipPermanentErrorsMiddleware)
+
 	// router.AddConsumerHandler(
 	// 	"issue_receipt",
 	// 	"issue-receipt",

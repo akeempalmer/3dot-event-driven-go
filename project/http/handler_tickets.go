@@ -52,13 +52,14 @@ func (h Handler) PostTicketsConfirmation(c echo.Context) error {
 
 			msg := message.NewMessage(watermill.NewUUID(), []byte(payloadEvent))
 			msg.Metadata.Set("correlation_id", c.Request().Header.Get("Correlation-ID"))
+			msg.Metadata.Set("type", "TicketBookingConfirmed")
 			err = h.publisher.Publish("TicketBookingConfirmed", msg)
 			if err != nil {
 				continue
 			}
 
 		case "canceled":
-			payload := entities.TicketBookingConfirmed{
+			payload := entities.TicketBookingCanceled{
 				Header:        entities.NewMessageHeader(),
 				TicketID:      ticket.TicketID,
 				CustomerEmail: ticket.CustomerEmail,
@@ -72,6 +73,7 @@ func (h Handler) PostTicketsConfirmation(c echo.Context) error {
 
 			msg := message.NewMessage(watermill.NewUUID(), []byte(payloadEvent))
 			msg.Metadata.Set("correlation_id", c.Request().Header.Get("Correlation-ID"))
+			msg.Metadata.Set("type", "TicketBookingCanceled")
 			err = h.publisher.Publish("TicketBookingCanceled", msg)
 			if err != nil {
 				continue
