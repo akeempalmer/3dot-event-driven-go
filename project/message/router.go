@@ -6,10 +6,12 @@ import (
 	"tickets/entities"
 	"tickets/message/event"
 	"tickets/middlewares"
+	"time"
 
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill-redisstream/pkg/redisstream"
 	"github.com/ThreeDotsLabs/watermill/message"
+	"github.com/ThreeDotsLabs/watermill/message/router/middleware"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -60,6 +62,14 @@ func NewWatermillRouter(
 		MessageID: watermill.NewUUID(),
 		Payload:   "Handling a message",
 	}.LoggerMiddleware)
+
+	router.AddMiddleware(middleware.Retry{
+		MaxRetries:      10,
+		InitialInterval: time.Millisecond * 100,
+		MaxInterval:     time.Second,
+		Multiplier:      2,
+		Logger:          watermilLogger,
+	}.Middleware)
 
 	// router.AddConsumerHandler(
 	// 	"issue_receipt",
