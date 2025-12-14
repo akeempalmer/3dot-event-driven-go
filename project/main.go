@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log/slog"
+	"net/http"
 	"os"
 	"os/signal"
 
@@ -21,7 +22,13 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
-	apiClients, err := clients.NewClients(os.Getenv("GATEWAY_ADDR"), nil)
+	apiClients, err := clients.NewClients(
+		os.Getenv("GATEWAY_ADDR"),
+		func(ctx context.Context, req *http.Request) error {
+			req.Header.Set("Correlation-ID", log.CorrelationIDFromContext(ctx))
+			return nil
+		},
+	)
 	if err != nil {
 		panic(err)
 	}
@@ -29,10 +36,13 @@ func main() {
 	redisClient := redis.NewClient(&redis.Options{
 		Addr: os.Getenv("REDIS_ADDR"),
 	})
+
 	err = redisClient.Ping(context.Background()).Err()
+
 	if err != nil {
 		panic(err)
 	}
+
 	defer redisClient.Close()
 
 	spreadsheetsAPI := adapters.NewSpreadsheetsAPIClient(apiClients)
