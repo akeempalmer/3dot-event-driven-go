@@ -35,6 +35,10 @@ func (h Handler) PostTicketsConfirmation(c echo.Context) error {
 
 	for _, ticket := range request.Tickets {
 
+		if ticket.Price.Currency == "" {
+			ticket.Price.Currency = "USD"
+		}
+
 		switch ticket.Status {
 		case "confirmed":
 			payload := entities.TicketBookingConfirmed{

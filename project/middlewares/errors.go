@@ -1,8 +1,6 @@
 package middlewares
 
 import (
-	"log/slog"
-
 	"github.com/ThreeDotsLabs/watermill/message"
 )
 
@@ -12,10 +10,11 @@ func SkipPermanentErrorsMiddleware(next message.HandlerFunc) message.HandlerFunc
 			return nil, nil
 		}
 
-		if msg.Metadata.Get("type") != "TicketBookingConfirmed" {
-			slog.Error("Invalid message type")
-			return nil, nil
-		}
+		// TODO
+		// if msg.Metadata.Get("type") != "TicketBookingConfirmed" {
+		// 	slog.Error("Invalid message type")
+		// 	return nil, nil
+		// }
 
 		return next(msg)
 	}
