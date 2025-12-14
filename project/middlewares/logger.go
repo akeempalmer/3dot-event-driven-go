@@ -2,12 +2,9 @@ package middlewares
 
 import (
 	"context"
-	"fmt"
-	"log/slog"
 
 	"github.com/ThreeDotsLabs/go-event-driven/v2/common/log"
 	"github.com/ThreeDotsLabs/watermill/message"
-	"github.com/lithammer/shortuuid/v3"
 )
 
 type LogHeader struct {
@@ -19,22 +16,13 @@ type LogHeader struct {
 
 func (lh LogHeader) LoggerMiddleware(next message.HandlerFunc) message.HandlerFunc {
 	return func(msg *message.Message) ([]*message.Message, error) {
-		correlationID := msg.Metadata.Get("correlation_id")
-
-		if correlationID == "" {
-			correlationID = fmt.Sprintf("gen_%s", shortuuid.New())
-		}
-
-		ctx := log.ContextWithCorrelationID(msg.Context(), correlationID)
-		msg.SetContext(ctx)
-
-		logger := slog.With(
-			"message_id", msg.UUID,
+		logger := log.FromContext(msg.Context())
+		logger.With("message_id", msg.UUID,
 			"metadata", msg.Metadata,
-			"handler", msg.Context(),
-		)
+			"handler", msg.Context())
 
-		logger.Info("Handling a message")
+		logger.With("message_id", log.CorrelationIDFromContext(msg.Context())).Info("Handling a message")
+
 		return next(msg)
 	}
 }

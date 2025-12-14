@@ -54,6 +54,7 @@ func NewWatermillRouter(
 	if err != nil {
 		panic(err)
 	}
+	router.AddMiddleware(middlewares.LogHeader{}.CorrelationMiddleware)
 
 	router.AddMiddleware(middlewares.LogHeader{
 		MessageID: watermill.NewUUID(),
