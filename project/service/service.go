@@ -12,10 +12,9 @@ import (
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/sync/errgroup"
 
-	"tickets/adapters"
 	ticketsHttp "tickets/http"
 	"tickets/message"
-	"tickets/worker"
+	"tickets/message/event"
 )
 
 type Service struct {
@@ -24,8 +23,8 @@ type Service struct {
 }
 
 func New(
-	spreadsheetsAPI worker.SpreadsheetsAPI,
-	receiptsService *adapters.ReceiptsServiceClient,
+	spreadsheetsAPI event.SpreadsheetsAPI,
+	receiptsService event.ReceiptsService,
 	redisClient *redis.Client,
 ) Service {
 	watermillLogger := watermill.NewSlogLogger(slog.Default())
