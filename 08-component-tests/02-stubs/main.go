@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"sync"
 )
 
 type IssueReceiptRequest struct {
@@ -20,4 +21,15 @@ type ReceiptsService interface {
 
 type ReceiptsServiceStub struct {
 	// todo: implement me
+	IssuedReceipts []IssueReceiptRequest
+	lock           sync.Mutex
+}
+
+func (s *ReceiptsServiceStub) IssueReceipt(ctx context.Context, request IssueReceiptRequest) error {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	s.IssuedReceipts = append(s.IssuedReceipts, request)
+
+	return nil
 }
