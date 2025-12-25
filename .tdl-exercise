@@ -1,4 +1,4 @@
-exercise_id = "512093a5-f97d-42a8-ad34-1558c4ee8a64"
-directory = "09-cqrs-events/02-custom-event-name"
+exercise_id = "ed6ebd85-60e6-40ac-994b-12d16419c074"
+directory = "09-cqrs-events/03-handling-correlation-id"
 is_text_only = false
 is_optional = false
