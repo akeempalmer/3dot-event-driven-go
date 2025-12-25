@@ -1,4 +1,4 @@
-exercise_id = "4e969d94-0efd-4a60-a6be-8ef2fd672533"
-directory = "project"
+exercise_id = "68a8c876-d8d7-4ade-9956-f274c5d1f3a8"
+directory = "09-cqrs-events/01-event-bus"
 is_text_only = false
-is_optional = true
+is_optional = false
