@@ -8,5 +8,10 @@ import (
 )
 
 func NewEventBus(pub message.Publisher) (*cqrs.EventBus, error) {
-	return nil, fmt.Errorf("not implemented")
+	eventBus, err := cqrs.NewEventBus(pub, func(eventName string) string { return eventName }, cqrs.JSONMarshaler{})
+	if err != nil {
+		return nil, fmt.Errorf("could not create event bus: %w", err)
+	}
+
+	return eventBus, nil
 }
