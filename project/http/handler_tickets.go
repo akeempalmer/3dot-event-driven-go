@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"tickets/entities"
 
+	"github.com/ThreeDotsLabs/go-event-driven/v2/common/log"
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/labstack/echo/v4"
@@ -57,7 +58,10 @@ func (h Handler) PostTicketsConfirmation(c echo.Context) error {
 			msg := message.NewMessage(watermill.NewUUID(), []byte(payloadEvent))
 			msg.Metadata.Set("correlation_id", c.Request().Header.Get("Correlation-ID"))
 			msg.Metadata.Set("type", "TicketBookingConfirmed")
-			err = h.publisher.Publish("TicketBookingConfirmed", msg)
+			// err = h.publisher.Publish("TicketBookingConfirmed", msg)
+
+			log.CorrelationIDFromContext(c.Request().Context())
+			err = h.publisher.Publish(c.Request().Context(), payload)
 			if err != nil {
 				continue
 			}
@@ -78,7 +82,10 @@ func (h Handler) PostTicketsConfirmation(c echo.Context) error {
 			msg := message.NewMessage(watermill.NewUUID(), []byte(payloadEvent))
 			msg.Metadata.Set("correlation_id", c.Request().Header.Get("Correlation-ID"))
 			msg.Metadata.Set("type", "TicketBookingCanceled")
-			err = h.publisher.Publish("TicketBookingCanceled", msg)
+			// err = h.publisher.Publish("TicketBookingCanceled", msg)
+
+			log.CorrelationIDFromContext(c.Request().Context())
+			err = h.publisher.Publish(c.Request().Context(), payload)
 			if err != nil {
 				continue
 			}

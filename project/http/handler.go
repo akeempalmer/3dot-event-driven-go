@@ -1,8 +1,9 @@
 package http
 
-import "github.com/ThreeDotsLabs/watermill/message"
+import "github.com/ThreeDotsLabs/watermill/components/cqrs"
 
 type Handler struct {
 	// worker *worker.Worker
-	publisher message.Publisher
+	// publisher message.Publisher
+	publisher *cqrs.EventBus
 }
