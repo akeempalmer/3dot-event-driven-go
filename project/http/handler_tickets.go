@@ -61,7 +61,7 @@ func (h Handler) PostTicketsConfirmation(c echo.Context) error {
 			// err = h.publisher.Publish("TicketBookingConfirmed", msg)
 
 			log.CorrelationIDFromContext(c.Request().Context())
-			err = h.publisher.Publish(c.Request().Context(), payload)
+			err = h.eventBus.Publish(c.Request().Context(), payload)
 			if err != nil {
 				continue
 			}
@@ -85,7 +85,7 @@ func (h Handler) PostTicketsConfirmation(c echo.Context) error {
 			// err = h.publisher.Publish("TicketBookingCanceled", msg)
 
 			log.CorrelationIDFromContext(c.Request().Context())
-			err = h.publisher.Publish(c.Request().Context(), payload)
+			err = h.eventBus.Publish(c.Request().Context(), payload)
 			if err != nil {
 				continue
 			}

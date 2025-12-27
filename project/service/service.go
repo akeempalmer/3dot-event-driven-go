@@ -3,13 +3,11 @@ package service
 import (
 	"context"
 	"errors"
-	"log"
 	"log/slog"
 	stdHTTP "net/http"
 
 	watermillLog "github.com/ThreeDotsLabs/go-event-driven/v2/common/log"
 	"github.com/ThreeDotsLabs/watermill"
-	"github.com/ThreeDotsLabs/watermill/components/cqrs"
 	watermillMessage "github.com/ThreeDotsLabs/watermill/message"
 	"github.com/labstack/echo/v4"
 	"github.com/redis/go-redis/v9"
@@ -40,18 +38,20 @@ func New(
 		Publisher: redisPublisher,
 	}
 
-	watermillRouter := message.NewWatermillRouter(
-		receiptsService,
+	eventBus := event.NewBus(redisPublisher)
+
+	eventsHandler := event.NewHandler(
 		spreadsheetsAPI,
-		redisClient,
-		watermillLogger,
+		receiptsService,
 	)
 
-	// Create the Event Bus
-	eventBus, err := NewEventBus(redisPublisher)
-	if err != nil {
-		log.Fatalf("could not create event bus: %v", err)
-	}
+	eventProcessorConfig := event.NewProcessorConfig(redisClient, watermillLogger)
+
+	watermillRouter := message.NewWatermillRouter(
+		eventProcessorConfig,
+		eventsHandler,
+		watermillLogger,
+	)
 
 	echoRouter := ticketsHttp.NewHttpRouter(eventBus)
 
@@ -59,20 +59,6 @@ func New(
 		echoRouter,
 		watermillRouter,
 	}
-}
-
-func NewEventBus(pub watermillMessage.Publisher) (*cqrs.EventBus, error) {
-	return cqrs.NewEventBusWithConfig(
-		pub,
-		cqrs.EventBusConfig{
-			GeneratePublishTopic: func(params cqrs.GenerateEventPublishTopicParams) (string, error) {
-				return params.EventName, nil
-			},
-			Marshaler: cqrs.JSONMarshaler{
-				GenerateName: cqrs.StructName,
-			},
-		},
-	)
 }
 
 func (s Service) Run(ctx context.Context) error {

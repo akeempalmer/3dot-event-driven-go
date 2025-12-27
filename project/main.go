@@ -36,14 +36,13 @@ func main() {
 	redisClient := redis.NewClient(&redis.Options{
 		Addr: os.Getenv("REDIS_ADDR"),
 	})
+	defer redisClient.Close()
 
 	err = redisClient.Ping(context.Background()).Err()
 
 	if err != nil {
 		panic(err)
 	}
-
-	defer redisClient.Close()
 
 	spreadsheetsAPI := adapters.NewSpreadsheetsAPIClient(apiClients)
 	receiptsService := adapters.NewReceiptsServiceClient(apiClients)

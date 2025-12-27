@@ -16,7 +16,7 @@ func NewHttpRouter(
 	e := libHttp.NewEcho()
 
 	handler := Handler{
-		publisher: eventBus,
+		eventBus: eventBus,
 	}
 
 	// e.POST("/tickets-confirmation", handler.PostTicketsConfirmation)

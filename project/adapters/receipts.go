@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"sync"
 	"tickets/entities"
 
 	"github.com/ThreeDotsLabs/go-event-driven/v2/common/clients"
@@ -51,18 +50,4 @@ func (c ReceiptsServiceClient) IssueReceipt(ctx context.Context, request entitie
 
 type ReceiptsService interface {
 	IssueReceipt(ctx context.Context, request entities.IssueReceiptPayload) error
-}
-
-type ReceiptsServiceStub struct {
-	IssuedReceipts []entities.IssueReceiptPayload
-	lock           sync.Mutex
-}
-
-func (s *ReceiptsServiceStub) IssueReceipt(ctx context.Context, request entities.IssueReceiptPayload) error {
-	s.lock.Lock()
-	defer s.lock.Unlock()
-
-	s.IssuedReceipts = append(s.IssuedReceipts, request)
-
-	return nil
 }

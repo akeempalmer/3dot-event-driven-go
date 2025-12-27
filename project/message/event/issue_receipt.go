@@ -7,7 +7,7 @@ import (
 	"tickets/entities"
 )
 
-func (h Handler) IssueReceipt(ctx context.Context, event entities.TicketBookingConfirmed) error {
+func (h Handler) IssueReceipt(ctx context.Context, event *entities.TicketBookingConfirmed) error {
 	slog.Info("Issuing receipt")
 
 	payload := entities.IssueReceiptPayload{
