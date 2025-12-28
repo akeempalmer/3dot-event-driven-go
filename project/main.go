@@ -12,7 +12,10 @@ import (
 	"github.com/redis/go-redis/v9"
 
 	"tickets/adapters"
+	"tickets/database"
 	"tickets/service"
+
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -46,6 +49,11 @@ func main() {
 
 	spreadsheetsAPI := adapters.NewSpreadsheetsAPIClient(apiClients)
 	receiptsService := adapters.NewReceiptsServiceClient(apiClients)
+
+	db := database.InitializeSchema()
+	db.Ping()
+
+	defer db.Close()
 
 	err = service.New(
 		spreadsheetsAPI,
