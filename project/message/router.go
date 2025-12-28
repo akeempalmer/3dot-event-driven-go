@@ -46,10 +46,13 @@ func NewWatermillRouter(
 			"IssueReceipt",
 			eventHandler.IssueReceipt,
 		),
-
 		cqrs.NewEventHandler(
 			"StoreTicketToDatabase",
 			eventHandler.SaveTicketToDatabase,
+		),
+		cqrs.NewEventHandler(
+			"DeleteTicketFromDatabase",
+			eventHandler.DeleteTicketFromDatabase,
 		),
 	)
 

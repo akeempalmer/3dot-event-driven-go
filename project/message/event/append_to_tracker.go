@@ -28,3 +28,14 @@ func (h Handler) SaveTicketToDatabase(ctx context.Context, event *entities.Ticke
 
 	return nil
 }
+
+func (h Handler) DeleteTicketFromDatabase(ctx context.Context, event *entities.TicketBookingCanceled) error {
+	slog.Info("Deleting ticket from the database")
+
+	err := h.ticketRepo.Delete(ctx, event.TicketID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
