@@ -59,6 +59,7 @@ func main() {
 		spreadsheetsAPI,
 		receiptsService,
 		redisClient,
+		db,
 	).Run(ctx)
 	if err != nil {
 		panic(err)

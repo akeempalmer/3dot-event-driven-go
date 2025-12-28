@@ -9,6 +9,7 @@ import (
 	watermillLog "github.com/ThreeDotsLabs/go-event-driven/v2/common/log"
 	"github.com/ThreeDotsLabs/watermill"
 	watermillMessage "github.com/ThreeDotsLabs/watermill/message"
+	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/sync/errgroup"
@@ -27,6 +28,7 @@ func New(
 	spreadsheetsAPI event.SpreadsheetsAPI,
 	receiptsService event.ReceiptsService,
 	redisClient *redis.Client,
+	db *sqlx.DB,
 ) Service {
 	watermillLogger := watermill.NewSlogLogger(slog.Default())
 
@@ -43,6 +45,7 @@ func New(
 	eventsHandler := event.NewHandler(
 		spreadsheetsAPI,
 		receiptsService,
+		db,
 	)
 
 	eventProcessorConfig := event.NewProcessorConfig(redisClient, watermillLogger)

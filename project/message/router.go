@@ -46,6 +46,11 @@ func NewWatermillRouter(
 			"IssueReceipt",
 			eventHandler.IssueReceipt,
 		),
+
+		cqrs.NewEventHandler(
+			"StoreTicketToDatabase",
+			eventHandler.SaveTicketToDatabase,
+		),
 	)
 
 	// handler := event.NewHandler(spreadsheetsAPI, receiptsService)

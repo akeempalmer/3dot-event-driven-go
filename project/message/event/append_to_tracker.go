@@ -17,3 +17,14 @@ func (h Handler) AppendCancelToTracker(ctx context.Context, event *entities.Tick
 
 	return h.spreadsheetsAPI.AppendRow(ctx, "tickets-to-refund", []string{event.TicketID, event.CustomerEmail, event.Price.Amount, event.Price.Currency})
 }
+
+func (h Handler) SaveTicketToDatabase(ctx context.Context, event *entities.TicketBookingConfirmed) error {
+	slog.Info("Saving ticket to the database")
+
+	err := h.ticketRepo.Save(ctx, event)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
