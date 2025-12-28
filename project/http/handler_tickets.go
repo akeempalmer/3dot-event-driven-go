@@ -2,6 +2,8 @@ package http
 
 import (
 	"encoding/json"
+	"fmt"
+	"log/slog"
 	"net/http"
 	"tickets/entities"
 
@@ -129,4 +131,17 @@ func (h Handler) PostTicketsConfirmation(c echo.Context) error {
 	}
 
 	return c.NoContent(http.StatusOK)
+}
+
+func (h Handler) GetAllTickets(c echo.Context) error {
+	slog.Info("Getting all tickets")
+
+	tickets, err := h.ticketRepo.FindAll(c.Request().Context())
+	if err != nil {
+		slog.Error("Failed to get tickets from database", slog.String("error", err.Error()))
+		fmt.Printf("Error retrieving tickets: %v\n", err)
+		return c.NoContent(http.StatusNotFound)
+	}
+
+	return c.JSON(http.StatusOK, tickets)
 }

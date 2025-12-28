@@ -19,6 +19,19 @@ func NewTicketRepository(db *sqlx.DB) *TicketRepository {
 	return &TicketRepository{db: db}
 }
 
+func (tr *TicketRepository) FindAll(ctx context.Context) ([]entities.Ticket, error) {
+	var returnedTickets []entities.Ticket
+
+	query := `SELECT ticket_id, price_amount as "price.amount", price_currency as "price.currency", customer_email FROM tickets`
+
+	err := tr.db.SelectContext(ctx, &returnedTickets, query)
+	if err != nil {
+		return nil, err
+	}
+
+	return returnedTickets, nil
+}
+
 func (tr *TicketRepository) Save(ctx context.Context, ticket *entities.TicketBookingConfirmed) error {
 	query := `INSERT INTO tickets (ticket_id, price_amount, price_currency, customer_email) VALUES ($1, $2, $3, $4)`
 	_, err := tr.db.ExecContext(ctx, query, ticket.TicketID, ticket.Price.Amount, ticket.Price.Currency, ticket.CustomerEmail)
