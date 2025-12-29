@@ -33,7 +33,12 @@ func (tr *TicketRepository) FindAll(ctx context.Context) ([]entities.Ticket, err
 }
 
 func (tr *TicketRepository) Save(ctx context.Context, ticket *entities.TicketBookingConfirmed) error {
-	query := `INSERT INTO tickets (ticket_id, price_amount, price_currency, customer_email) VALUES ($1, $2, $3, $4)`
+	query :=
+		`
+			INSERT INTO tickets (ticket_id, price_amount, price_currency, customer_email) 
+			VALUES ($1, $2, $3, $4)
+			ON CONFLICT (ticket_id) DO NOTHING;
+		`
 	_, err := tr.db.ExecContext(ctx, query, ticket.TicketID, ticket.Price.Amount, ticket.Price.Currency, ticket.CustomerEmail)
 
 	if err != nil {
