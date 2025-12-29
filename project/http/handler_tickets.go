@@ -68,6 +68,15 @@ func (h Handler) PostTicketsConfirmation(c echo.Context) error {
 				continue
 			}
 
+			err = h.eventBus.Publish(c.Request().Context(), entities.TicketPrinted{
+				Header:   entities.NewMessageHeader(),
+				TicketID: ticket.TicketID,
+				FileName: ticket.TicketID + "-ticket.html",
+			})
+			if err != nil {
+				return fmt.Errorf("failed to publish TicketPrinted event %w", err)
+			}
+
 		case "canceled":
 			payload := entities.TicketBookingCanceled{
 				Header:        entities.NewMessageHeader(),
