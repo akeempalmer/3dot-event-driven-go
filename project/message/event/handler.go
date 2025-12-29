@@ -2,7 +2,7 @@ package event
 
 import (
 	"context"
-	"tickets/database/tickets"
+	"tickets/db/tickets"
 	"tickets/entities"
 
 	"github.com/jmoiron/sqlx"

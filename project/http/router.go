@@ -1,7 +1,7 @@
 package http
 
 import (
-	"tickets/database/tickets"
+	"tickets/db/tickets"
 
 	libHttp "github.com/ThreeDotsLabs/go-event-driven/v2/common/http"
 	"github.com/ThreeDotsLabs/watermill"

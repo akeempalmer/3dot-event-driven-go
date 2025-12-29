@@ -1,7 +1,7 @@
 package http
 
 import (
-	"tickets/database/tickets"
+	"tickets/db/tickets"
 
 	"github.com/ThreeDotsLabs/watermill/components/cqrs"
 )
