@@ -36,6 +36,12 @@ func (h Handler) PostTicketsConfirmation(c echo.Context) error {
 	// 	h.worker.Send(worker.Message{Task: worker.TaskAppendToTracker, TicketID: ticket})
 	// }
 
+	// Check the Idempontent Header
+	idempontentKey := c.Request().Header.Get("Idempotency-Key")
+	if idempontentKey == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Idempotency-Key header is required")
+	}
+
 	for _, ticket := range request.Tickets {
 
 		if ticket.Price.Currency == "" {
@@ -44,8 +50,9 @@ func (h Handler) PostTicketsConfirmation(c echo.Context) error {
 
 		switch ticket.Status {
 		case "confirmed":
+
 			payload := entities.TicketBookingConfirmed{
-				Header:        entities.NewMessageHeader(),
+				Header:        entities.NewMessageHeaderWithIdempotencyKey(idempontentKey + ticket.TicketID),
 				TicketID:      ticket.TicketID,
 				CustomerEmail: ticket.CustomerEmail,
 				Price:         ticket.Price,
@@ -79,7 +86,7 @@ func (h Handler) PostTicketsConfirmation(c echo.Context) error {
 
 		case "canceled":
 			payload := entities.TicketBookingCanceled{
-				Header:        entities.NewMessageHeader(),
+				Header:        entities.NewMessageHeaderWithIdempotencyKey(idempontentKey + ticket.TicketID),
 				TicketID:      ticket.TicketID,
 				CustomerEmail: ticket.CustomerEmail,
 				Price:         ticket.Price,

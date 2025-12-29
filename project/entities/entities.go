@@ -29,8 +29,9 @@ type IssueReceiptRequest struct {
 }
 
 type IssueReceiptPayload struct {
-	TicketID string `json:"ticket_id"`
-	Price    Money  `json:"price"`
+	IdempotencyKey string `json:"idempotency_key"`
+	TicketID       string `json:"ticket_id"`
+	Price          Money  `json:"price"`
 }
 
 type TicketBookingConfirmed struct {
@@ -50,14 +51,24 @@ type TicketBookingCanceled struct {
 }
 
 type MessageHeader struct {
-	ID          string    `json:"id"`
-	PublishedAt time.Time `json:"published_at"`
+	ID             string    `json:"id"`
+	PublishedAt    time.Time `json:"published_at"`
+	IdempotencyKey string    `json:"idempotency_key"`
 }
 
 func NewMessageHeader() MessageHeader {
 	return MessageHeader{
-		ID:          uuid.NewString(),
-		PublishedAt: time.Now().UTC(),
+		ID:             uuid.NewString(),
+		PublishedAt:    time.Now().UTC(),
+		IdempotencyKey: uuid.NewString(),
+	}
+}
+
+func NewMessageHeaderWithIdempotencyKey(idempotencyKey string) MessageHeader {
+	return MessageHeader{
+		ID:             uuid.NewString(),
+		PublishedAt:    time.Now().UTC(),
+		IdempotencyKey: idempotencyKey,
 	}
 }
 
