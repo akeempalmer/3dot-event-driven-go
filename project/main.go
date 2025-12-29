@@ -49,6 +49,7 @@ func main() {
 
 	spreadsheetsAPI := adapters.NewSpreadsheetsAPIClient(apiClients)
 	receiptsService := adapters.NewReceiptsServiceClient(apiClients)
+	// filesAPI := adapters.NewFilesApiClient(apiClients)
 
 	db := db.InitializeSchema()
 	db.Ping()

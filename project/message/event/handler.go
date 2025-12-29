@@ -12,13 +12,14 @@ import (
 type Handler struct {
 	spreadsheetsAPI SpreadsheetsAPI
 	receiptsService ReceiptsService
-	ticketRepo      *tickets.TicketRepository
 	apiClients      *clients.Clients
+	ticketRepo      *tickets.TicketRepository
 }
 
 func NewHandler(
 	spreadsheetsAPI SpreadsheetsAPI,
 	receiptsService ReceiptsService,
+	// filesAPI FilesAPI,
 	db *sqlx.DB,
 	apiClients *clients.Clients,
 ) Handler {
@@ -28,6 +29,9 @@ func NewHandler(
 	if receiptsService == nil {
 		panic("missing receiptsService")
 	}
+	// if filesAPI == nil {
+	// 	panic("missing filesAPI")
+	// }
 
 	ticketRepo := tickets.NewTicketRepository(db)
 
@@ -45,4 +49,8 @@ type SpreadsheetsAPI interface {
 
 type ReceiptsService interface {
 	IssueReceipt(ctx context.Context, request entities.IssueReceiptPayload) error
+}
+
+type FilesAPI interface {
+	UploadFile(ctx context.Context, fileID string, fileContent string) error
 }

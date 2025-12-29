@@ -13,6 +13,10 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+type TicketsStatusRequest struct {
+	Tickets []TicketStatusRequest `json:"tickets"`
+}
+
 type TicketStatusRequest struct {
 	TicketID      string         `json:"ticket_id"`
 	Status        string         `json:"status"`
