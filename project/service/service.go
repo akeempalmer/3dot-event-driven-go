@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	stdHTTP "net/http"
 
+	"github.com/ThreeDotsLabs/go-event-driven/v2/common/clients"
 	watermillLog "github.com/ThreeDotsLabs/go-event-driven/v2/common/log"
 	"github.com/ThreeDotsLabs/watermill"
 	watermillMessage "github.com/ThreeDotsLabs/watermill/message"
@@ -29,6 +30,7 @@ func New(
 	receiptsService event.ReceiptsService,
 	redisClient *redis.Client,
 	db *sqlx.DB,
+	apiClients *clients.Clients,
 ) Service {
 	watermillLogger := watermill.NewSlogLogger(slog.Default())
 
@@ -46,6 +48,7 @@ func New(
 		spreadsheetsAPI,
 		receiptsService,
 		db,
+		apiClients,
 	)
 
 	eventProcessorConfig := event.NewProcessorConfig(redisClient, watermillLogger)

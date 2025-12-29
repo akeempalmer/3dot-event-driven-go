@@ -60,6 +60,7 @@ func main() {
 		receiptsService,
 		redisClient,
 		db,
+		apiClients,
 	).Run(ctx)
 	if err != nil {
 		panic(err)
