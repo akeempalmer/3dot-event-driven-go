@@ -1,4 +1,4 @@
-exercise_id = "cddd4573-54f9-4383-a6d1-943f5f182646"
-directory = "11-outbox/07-forwarding-with-outbox"
+exercise_id = "25462de9-4b8d-4fe5-b49e-7277e18e94d8"
+directory = "11-outbox/08-publishing-events-with-forwarder"
 is_text_only = false
 is_optional = false
