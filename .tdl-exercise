@@ -1,4 +1,4 @@
-exercise_id = "9d4b03d3-0749-4a95-8b20-17323ad232bf"
-directory = "project"
+exercise_id = "e85d8d0f-d7f9-4d3a-aed0-2a7bb3609303"
+directory = "11-outbox/06-subscribing-to-sql"
 is_text_only = false
 is_optional = false
