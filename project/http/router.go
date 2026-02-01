@@ -1,6 +1,7 @@
 package http
 
 import (
+	"tickets/db/bookings"
 	shows "tickets/db/show"
 	"tickets/db/tickets"
 
@@ -21,9 +22,10 @@ func NewHttpRouter(
 	e := libHttp.NewEcho()
 
 	handler := Handler{
-		eventBus:   eventBus,
-		ticketRepo: tickets.NewTicketRepository(db),
-		showRepo:   shows.NewShowRepository(db),
+		eventBus:    eventBus,
+		ticketRepo:  tickets.NewTicketRepository(db),
+		showRepo:    shows.NewShowRepository(db),
+		bookingRepo: bookings.NewBookingRepository(db),
 	}
 
 	// e.POST("/tickets-confirmation", handler.PostTicketsConfirmation)
@@ -34,6 +36,8 @@ func NewHttpRouter(
 	e.GET("/health", handler.GetHealthHandler)
 
 	e.POST("/shows", handler.CreateNewShow)
+
+	e.POST("/book-tickets", handler.CreateNewBooking)
 
 	return e
 }

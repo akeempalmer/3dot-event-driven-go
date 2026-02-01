@@ -39,5 +39,19 @@ func InitializeSchema() *sqlx.DB {
 	if err != nil {
 		panic(err)
 	}
+
+	query = `CREATE TABLE IF NOT EXISTS bookings (
+    booking_id UUID PRIMARY KEY,
+    show_id UUID NOT NULL,
+    number_of_tickets INT NOT NULL,
+    customer_email VARCHAR(255) NOT NULL,
+    FOREIGN KEY (show_id) REFERENCES shows(show_id)
+	);
+	`
+	_, err = db.Exec(query)
+	if err != nil {
+		panic(err)
+	}
+
 	return db
 }
