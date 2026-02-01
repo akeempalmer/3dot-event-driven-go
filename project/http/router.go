@@ -1,6 +1,7 @@
 package http
 
 import (
+	shows "tickets/db/show"
 	"tickets/db/tickets"
 
 	libHttp "github.com/ThreeDotsLabs/go-event-driven/v2/common/http"
@@ -22,6 +23,7 @@ func NewHttpRouter(
 	handler := Handler{
 		eventBus:   eventBus,
 		ticketRepo: tickets.NewTicketRepository(db),
+		showRepo:   shows.NewShowRepository(db),
 	}
 
 	// e.POST("/tickets-confirmation", handler.PostTicketsConfirmation)
@@ -30,6 +32,8 @@ func NewHttpRouter(
 	e.GET("/tickets", handler.GetAllTickets)
 
 	e.GET("/health", handler.GetHealthHandler)
+
+	e.POST("/shows", handler.CreateNewShow)
 
 	return e
 }
